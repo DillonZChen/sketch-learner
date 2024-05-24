@@ -1,6 +1,6 @@
 ./dependencies/mimir
 lab==8.1
-pynauty==2.8.6
+pynauty==1.1.2
 graphviz==0.20.1
 dlplan==0.3.23
 clingo
