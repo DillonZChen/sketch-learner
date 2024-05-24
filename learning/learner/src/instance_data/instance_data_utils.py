@@ -1,18 +1,18 @@
 import logging
-from typing import  List, Tuple, Dict
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List, Tuple
 
-from dlplan.core import VocabularyInfo, InstanceInfo, State, DenotationsCaches
+from dlplan.core import DenotationsCaches, InstanceInfo, State, VocabularyInfo
 from dlplan.state_space import StateSpace
-
-from .instance_data import InstanceData
 
 from ..domain_data.domain_data import DomainData
 from ..domain_data.domain_data_utils import compute_domain_data
-from ..util.command import change_dir, write_file
 from ..symmetries.exact import Driver
 from ..symmetries.key_to_int import KeyToInt
+from ..util.command import change_dir, write_file
+from .instance_data import InstanceData
+
 
 def compute_instance_datas(domain_filepath: Path,
                            instance_filepaths: List[Path],

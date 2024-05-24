@@ -1,20 +1,17 @@
 import os
-
 from collections import defaultdict
-from typing import List, Union
 from pathlib import Path
+from typing import List, Union
 
+from clingo import Control, Number, String, Symbol
 from dlplan.core import Boolean, Numerical
-from dlplan.policy import PositiveBooleanCondition, NegativeBooleanCondition, GreaterNumericalCondition, EqualNumericalCondition, PositiveBooleanEffect, NegativeBooleanEffect, UnchangedBooleanEffect, DecrementNumericalEffect, IncrementNumericalEffect, UnchangedNumericalEffect
-
-from clingo import Control, Number, Symbol, String
-
-from .returncodes import ClingoExitCode
-from .encoding_type import EncodingType
+from dlplan.policy import (DecrementNumericalEffect, EqualNumericalCondition, GreaterNumericalCondition, IncrementNumericalEffect, NegativeBooleanCondition,
+                           NegativeBooleanEffect, PositiveBooleanCondition, PositiveBooleanEffect, UnchangedBooleanEffect, UnchangedNumericalEffect)
 
 from ..domain_data.domain_data import DomainData
 from ..instance_data.instance_data import InstanceData
-
+from .encoding_type import EncodingType
+from .returncodes import ClingoExitCode
 
 LIST_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,6 +19,7 @@ LIST_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
 class ASPFactory:
     def __init__(self, encoding_type: EncodingType, enable_goal_separating_features: bool, max_num_rules: int):
         add_arguments = []
+        self.encoding_type = encoding_type
         if encoding_type == EncodingType.EXPLICIT:
             add_arguments.extend(["--const", f"max_num_rules={max_num_rules}"])
 
@@ -58,7 +56,9 @@ class ASPFactory:
         self.ctl.add("r_distance", ["i", "s", "r", "d"], "r_distance(i,s,r,d).")
         self.ctl.add("s_distance", ["i", "s1", "s2", "d"], "s_distance(i,s1,s2,d).")
 
-        if encoding_type == EncodingType.D2:
+        if encoding_type == EncodingType.EXPRESSIVITY:
+            self.ctl.load(str(LIST_DIR / "sketch-expressivity.lp"))
+        elif encoding_type == EncodingType.D2:
             self.ctl.load(str(LIST_DIR / "sketch-d2.lp"))
         elif encoding_type == EncodingType.EXPLICIT:
             self.ctl.load(str(LIST_DIR / "sketch-explicit.lp"))
@@ -352,7 +352,8 @@ class ASPFactory:
             for model in handle:
                 last_model = model
             if last_model is not None:
-                assert last_model.optimality_proven
+                if not self.encoding_type == EncodingType.EXPRESSIVITY:
+                    assert last_model.optimality_proven
                 return last_model.symbols(shown=True), ClingoExitCode.SATISFIABLE
             result = handle.get()
             if result.exhausted:

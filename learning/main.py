@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-
 from pathlib import Path
 
 from learner.learner import learn_sketch_for_problem_class
@@ -24,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("--disable_closed_Q", action='store_true', default=False, help="Whether the search space is closed. Default is True.")
     parser.add_argument("--max_num_states_per_instance", type=int, default=10000, help="The maximum number of states per instance.")
     parser.add_argument("--max_time_per_instance", type=int, default=10, help="The maximum time (in seconds) per instance.")
-    parser.add_argument("--encoding_type", type=encoding_type, default=EncodingType.D2, choices=["d2", "explicit"], help="The encoding type for the sketch learner.")
+    parser.add_argument("--encoding_type", type=encoding_type, default=EncodingType.EXPRESSIVITY, choices=["d2", "explicit", "expressivity"], help="The encoding type for the sketch learner.")
     parser.add_argument("--max_num_rules", type=int, default=4, help="The maximum number of rules used in the explicit encoding.")
     parser.add_argument("--enable_goal_separating_features", action='store_true', default=False, help="Whether to enable goal separating features. Default is True.")
     parser.add_argument("--disable_feature_generation", action='store_true', default=False, help="Whether to enable feature generation. Default is True.")

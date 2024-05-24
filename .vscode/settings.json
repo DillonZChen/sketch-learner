@@ -1,0 +1,13 @@
+{
+    "editor.rulers": [
+        160
+    ],
+    "black-formatter.args": [
+        "--line-length",
+        "160"
+    ],
+    "isort.args": [
+        "-l",
+        "160"
+    ],
+}

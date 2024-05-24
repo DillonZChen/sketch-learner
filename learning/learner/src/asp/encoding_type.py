@@ -8,3 +8,4 @@ class EncodingType(Enum):
     """
     D2 = 0
     EXPLICIT = 1
+    EXPRESSIVITY = 2

@@ -1,29 +1,28 @@
 import logging
-
 from pathlib import Path
-from termcolor import colored
 from typing import List
 
 from dlplan.policy import PolicyMinimizer
+from termcolor import colored
 
 from .exit_codes import ExitCode
-from .src.asp.encoding_type import EncodingType
 from .src.asp.asp_factory import ASPFactory
+from .src.asp.encoding_type import EncodingType
 from .src.asp.returncodes import ClingoExitCode
-from .src.util.command import create_experiment_workspace, change_working_directory, write_file, change_dir
-from .src.util.performance import memory_usage
-from .src.util.timer import Timer
-from .src.util.console import add_console_handler, print_separation_line
 from .src.instance_data.instance_data import InstanceData
 from .src.instance_data.instance_data_utils import compute_instance_datas
 from .src.instance_data.tuple_graph_utils import compute_tuple_graphs
-from .src.iteration_data.learning_statistics import LearningStatistics
+from .src.iteration_data.dlplan_policy_factory import D2sepDlplanPolicyFactory, ExplicitDlplanPolicyFactory
 from .src.iteration_data.feature_pool_utils import compute_feature_pool
 from .src.iteration_data.feature_valuations_utils import compute_per_state_feature_valuations
-from .src.iteration_data.dlplan_policy_factory import D2sepDlplanPolicyFactory, ExplicitDlplanPolicyFactory
+from .src.iteration_data.learning_statistics import LearningStatistics
 from .src.iteration_data.sketch import Sketch
 from .src.iteration_data.state_pair_equivalence_utils import compute_state_pair_equivalences
 from .src.iteration_data.tuple_graph_equivalence_utils import compute_tuple_graph_equivalences, minimize_tuple_graph_equivalences
+from .src.util.command import change_dir, change_working_directory, create_experiment_workspace, write_file
+from .src.util.console import add_console_handler, print_separation_line
+from .src.util.performance import memory_usage
+from .src.util.timer import Timer
 
 
 def compute_smallest_unsolved_instance(sketch: Sketch,
@@ -139,6 +138,54 @@ def learn_sketch_for_problem_class(
 
                 asp_timer.resume()
                 if encoding_type == EncodingType.D2:
+                    d2_facts = set()
+                    symbols = None
+                    j = 0
+                    while True:
+                        asp_factory = ASPFactory(encoding_type, enable_goal_separating_features, max_num_rules)
+                        facts = asp_factory.make_facts(domain_data, selected_instance_datas)
+                        if j == 0:
+                            d2_facts.update(asp_factory.make_initial_d2_facts(selected_instance_datas))
+                            print("Number of initial D2 facts:", len(d2_facts))
+                        elif j > 0:
+                            unsatisfied_d2_facts = asp_factory.make_unsatisfied_d2_facts(domain_data, symbols)
+                            d2_facts.update(unsatisfied_d2_facts)
+                            print("Number of unsatisfied D2 facts:", len(unsatisfied_d2_facts))
+                        print("Number of D2 facts:", len(d2_facts), "of", len(domain_data.domain_state_pair_equivalence.rules) ** 2)
+                        facts.extend(list(d2_facts))
+
+                        logging.info(colored("Grounding Logic Program...", "blue", "on_grey"))
+                        asp_factory.ground(facts)
+                        logging.info(colored("..done", "blue", "on_grey"))
+
+                        logging.info(colored("Solving Logic Program...", "blue", "on_grey"))
+                        symbols, returncode = asp_factory.solve()
+                        logging.info(colored("..done", "blue", "on_grey"))
+
+                        if returncode in [ClingoExitCode.UNSATISFIABLE, ClingoExitCode.EXHAUSTED]:
+                            print(colored("ASP is unsatisfiable!", "red", "on_grey"))
+                            print(colored(f"No sketch of width {width} exists that solves all instances!", "red", "on_grey"))
+                            exit(ExitCode.UNSOLVABLE)
+                        elif returncode == ClingoExitCode.UNKNOWN:
+                            print(colored("ASP solving throws unknown error!", "red", "on_grey"))
+                            exit(ExitCode.UNKNOWN)
+                        elif returncode == ClingoExitCode.INTERRUPTED:
+                            print(colored("ASP solving iterrupted!", "red", "on_grey"))
+                            exit(ExitCode.INTERRUPTED)
+
+                        asp_factory.print_statistics()
+                        dlplan_policy = D2sepDlplanPolicyFactory().make_dlplan_policy_from_answer_set(symbols, domain_data)
+                        sketch = Sketch(dlplan_policy, width)
+                        logging.info("Learned the following sketch:")
+                        sketch.print()
+                        if compute_smallest_unsolved_instance(sketch, selected_instance_datas, enable_goal_separating_features) is None:
+                            # Stop adding D2-separation constraints
+                            # if sketch solves all training instances
+                            break
+                        j += 1
+                elif encoding_type == EncodingType.EXPRESSIVITY:
+                    ## same as above but 
+                    ## TODO
                     d2_facts = set()
                     symbols = None
                     j = 0
