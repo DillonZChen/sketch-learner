@@ -1,8 +1,8 @@
 % No optimisation this is a constant number
-#minimize { C@2,complexity(F, C) : complexity(F, C), feature(F) }.
+#minimize { C@2,complexity(F, C) : complexity(F, C), feature(F), select(F) }.
 
 % Generate selected features
-% { select(F) } :- feature(F).
+select(F) :- feature(F).
 
 % Generate good equivalence classes
 { good(C) } :- state_pair_class(C).
@@ -24,9 +24,6 @@ r_reachable(I, S') :- D = D', r_reachable(I, S), good(I, S, S'), subgoal_distanc
 :- not good(C), subgoal(I, S, T), contain(I, S, T, C).
 % (Optimal-width): Require solvable states S' closer than subgoal to not be assigned to any rule.
 :- D < D', r_distance(I, S, C, D), subgoal_distance(I, S, D'), good(C).
-
-% Require D2-separation
-% :- good(C), not good(C'), d2_separate(C, C'), state_pair_class(C), state_pair_class(C'), { feature(F) : select(F), feature_effect(C, F, V), feature_effect(C', F, V'), V != V' } = 0, { feature(F) : select(F), feature_condition(C, F, V), feature_condition(C', F, V'), V != V' } = 0.
 
 
 % Define ``good`` pairs of state classes similar
