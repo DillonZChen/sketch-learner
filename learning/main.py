@@ -6,14 +6,6 @@ from pathlib import Path
 from learner.learner import learn_sketch_for_problem_class
 from learner.src.asp.encoding_type import EncodingType
 
-
-def encoding_type(value):
-    try:
-        return EncodingType[value]
-    except KeyError:
-        raise argparse.ArgumentTypeError(f"{value} is not a valid encoding type.")
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sketch learner.")
     parser.add_argument("--domain_filepath", type=Path, required=True, help="The path to the domain file.")
@@ -23,7 +15,7 @@ if __name__ == "__main__":
     parser.add_argument("--disable_closed_Q", action='store_true', default=False, help="Whether the search space is closed. Default is True.")
     parser.add_argument("--max_num_states_per_instance", type=int, default=10000, help="The maximum number of states per instance.")
     parser.add_argument("--max_time_per_instance", type=int, default=10, help="The maximum time (in seconds) per instance.")
-    parser.add_argument("--encoding_type", type=encoding_type, default=EncodingType.EXPRESSIVITY, choices=["d2", "explicit", "expressivity"], help="The encoding type for the sketch learner.")
+    parser.add_argument("--encoding_type", default="expressivity", choices=["d2", "explicit", "expressivity"], help="The encoding type for the sketch learner.")
     parser.add_argument("--max_num_rules", type=int, default=4, help="The maximum number of rules used in the explicit encoding.")
     parser.add_argument("--enable_goal_separating_features", action='store_true', default=False, help="Whether to enable goal separating features. Default is True.")
     parser.add_argument("--disable_feature_generation", action='store_true', default=False, help="Whether to enable feature generation. Default is True.")
@@ -39,6 +31,12 @@ if __name__ == "__main__":
 
 
     args = parser.parse_args()
+
+    args.encoding_type = {
+        "d2": EncodingType.D2,
+        "explicit": EncodingType.EXPLICIT,
+        "expressivity": EncodingType.EXPRESSIVITY,
+    }[args.encoding_type]
 
     learn_sketch_for_problem_class(args.domain_filepath.resolve(),
                                    args.problems_directory.resolve(),

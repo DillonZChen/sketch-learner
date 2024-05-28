@@ -1,0 +1,3 @@
+[training]
+domain_pddl = 'learning/benchmarks/blocks_4_on/domain.pddl'
+tasks_dir = 'learning/benchmarks/blocks_4_on/instances'

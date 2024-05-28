@@ -1,0 +1,3 @@
+[training]
+domain_pddl = 'learning/benchmarks/miconic/domain.pddl'
+tasks_dir = 'learning/benchmarks/miconic/instances'
