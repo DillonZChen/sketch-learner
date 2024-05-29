@@ -184,53 +184,36 @@ def learn_sketch_for_problem_class(
                             break
                         j += 1
                 elif encoding_type == EncodingType.EXPRESSIVITY:
-                    ## same as above but 
-                    ## TODO
+                    ## same as above but d2 facts removed
                     d2_facts = set()
                     symbols = None
-                    j = 0
-                    while True:
-                        asp_factory = ASPFactory(encoding_type, enable_goal_separating_features, max_num_rules)
-                        facts = asp_factory.make_facts(domain_data, selected_instance_datas)
-                        if j == 0:
-                            d2_facts.update(asp_factory.make_initial_d2_facts(selected_instance_datas))
-                            print("Number of initial D2 facts:", len(d2_facts))
-                        elif j > 0:
-                            unsatisfied_d2_facts = asp_factory.make_unsatisfied_d2_facts(domain_data, symbols)
-                            d2_facts.update(unsatisfied_d2_facts)
-                            print("Number of unsatisfied D2 facts:", len(unsatisfied_d2_facts))
-                        print("Number of D2 facts:", len(d2_facts), "of", len(domain_data.domain_state_pair_equivalence.rules) ** 2)
-                        facts.extend(list(d2_facts))
+                    asp_factory = ASPFactory(encoding_type, enable_goal_separating_features, max_num_rules)
+                    facts = asp_factory.make_facts(domain_data, selected_instance_datas)
 
-                        logging.info(colored("Grounding Logic Program...", "blue", "on_grey"))
-                        asp_factory.ground(facts)
-                        logging.info(colored("..done", "blue", "on_grey"))
+                    logging.info(colored("Grounding Logic Program...", "blue", "on_grey"))
+                    asp_factory.ground(facts)
+                    logging.info(colored("..done", "blue", "on_grey"))
 
-                        logging.info(colored("Solving Logic Program...", "blue", "on_grey"))
-                        symbols, returncode = asp_factory.solve()
-                        logging.info(colored("..done", "blue", "on_grey"))
+                    logging.info(colored("Solving Logic Program...", "blue", "on_grey"))
+                    symbols, returncode = asp_factory.solve()
+                    logging.info(colored("..done", "blue", "on_grey"))
 
-                        if returncode in [ClingoExitCode.UNSATISFIABLE, ClingoExitCode.EXHAUSTED]:
-                            print(colored("ASP is unsatisfiable!", "red", "on_grey"))
-                            print(colored(f"No sketch of width {width} exists that solves all instances!", "red", "on_grey"))
-                            exit(ExitCode.UNSOLVABLE)
-                        elif returncode == ClingoExitCode.UNKNOWN:
-                            print(colored("ASP solving throws unknown error!", "red", "on_grey"))
-                            exit(ExitCode.UNKNOWN)
-                        elif returncode == ClingoExitCode.INTERRUPTED:
-                            print(colored("ASP solving iterrupted!", "red", "on_grey"))
-                            exit(ExitCode.INTERRUPTED)
+                    if returncode in [ClingoExitCode.UNSATISFIABLE, ClingoExitCode.EXHAUSTED]:
+                        print(colored("ASP is unsatisfiable!", "red", "on_grey"))
+                        print(colored(f"No sketch of width {width} exists that solves all instances!", "red", "on_grey"))
+                        exit(ExitCode.UNSOLVABLE)
+                    elif returncode == ClingoExitCode.UNKNOWN:
+                        print(colored("ASP solving throws unknown error!", "red", "on_grey"))
+                        exit(ExitCode.UNKNOWN)
+                    elif returncode == ClingoExitCode.INTERRUPTED:
+                        print(colored("ASP solving iterrupted!", "red", "on_grey"))
+                        exit(ExitCode.INTERRUPTED)
 
-                        asp_factory.print_statistics()
-                        dlplan_policy = D2sepDlplanPolicyFactory().make_dlplan_policy_from_answer_set(symbols, domain_data)
-                        sketch = Sketch(dlplan_policy, width)
-                        logging.info("Learned the following sketch:")
-                        sketch.print()
-                        if compute_smallest_unsolved_instance(sketch, selected_instance_datas, enable_goal_separating_features) is None:
-                            # Stop adding D2-separation constraints
-                            # if sketch solves all training instances
-                            break
-                        j += 1
+                    asp_factory.print_statistics()
+                    dlplan_policy = D2sepDlplanPolicyFactory().make_dlplan_policy_from_answer_set(symbols, domain_data)
+                    sketch = Sketch(dlplan_policy, width)
+                    logging.info("Learned the following sketch:")
+                    sketch.print()
                 elif encoding_type == EncodingType.EXPLICIT:
                     asp_factory = ASPFactory(encoding_type, enable_goal_separating_features, max_num_rules)
                     facts = asp_factory.make_facts(domain_data, selected_instance_datas)

@@ -10,7 +10,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sketch learner.")
     parser.add_argument("--domain_filepath", type=Path, required=True, help="The path to the domain file.")
     parser.add_argument("--problems_directory", type=Path, required=True, help="The directory containing the problem files.")
-    parser.add_argument("--workspace", type=Path, required=True, help="The directory containing intermediate files.")
+    parser.add_argument("--workspace", type=Path, default="workspace", help="The directory containing intermediate files.")
     parser.add_argument("--width", type=int, default=1, help="The upper bound on the sketch width.")
     parser.add_argument("--disable_closed_Q", action='store_true', default=False, help="Whether the search space is closed. Default is True.")
     parser.add_argument("--max_num_states_per_instance", type=int, default=10000, help="The maximum number of states per instance.")
