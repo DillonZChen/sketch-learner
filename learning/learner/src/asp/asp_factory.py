@@ -130,9 +130,9 @@ class ASPFactory:
         for f_idx, feature in enumerate(domain_data.feature_pool.features):
             facts.append(self._create_feature_fact(f_idx))
             facts.append(self._create_complexity_fact(f_idx, feature.complexity))
-            if isinstance(feature.dlplan_feature, Boolean):
+            if feature.is_boolean():
                 facts.append(self._create_boolean_fact(f_idx))
-            elif isinstance(feature.dlplan_feature, Numerical):
+            elif feature.is_numerical():
                 facts.append(self._create_numerical_fact(f_idx))
         return facts
 
@@ -140,10 +140,10 @@ class ASPFactory:
     def _create_value_fact(self, instance_id: int, s_idx: int, f_idx: int, val: Union[bool, int]):
         return ("value", [Number(instance_id), Number(s_idx), Number(f_idx), Number(val)])
 
-    def _create_b_value_fact(self, dlplan_feature: Union[Boolean, Numerical], instance_id: int, s_idx: int, f_idx: int, val: Union[bool, int]):
-        if isinstance(dlplan_feature, Boolean):
+    def _create_b_value_fact(self, feature: Union[Boolean, Numerical], instance_id: int, s_idx: int, f_idx: int, val: Union[bool, int]):
+        if feature.is_boolean():
             return ("b_value", [Number(instance_id), Number(s_idx), Number(f_idx), Number(val)])
-        elif isinstance(dlplan_feature, Numerical):
+        elif feature.is_numerical():
             return ("b_value", [Number(instance_id), Number(s_idx), Number(f_idx), Number(1 if val > 0 else 0)])
         else:
             raise RuntimeError("Expected Boolean or Numerical feature.")
@@ -157,7 +157,7 @@ class ASPFactory:
                 feature_valuation = instance_data.per_state_feature_valuations.s_idx_to_feature_valuations[s_idx]
                 for f_idx, (feature, val) in enumerate(zip(feature_pool.features, feature_valuation.feature_valuations)):
                     facts.append(self._create_value_fact(instance_data.id, s_idx, f_idx, val))
-                    facts.append(self._create_b_value_fact(feature.dlplan_feature, instance_data.id, s_idx, f_idx, val))
+                    facts.append(self._create_b_value_fact(feature, instance_data.id, s_idx, f_idx, val))
         return facts
 
 

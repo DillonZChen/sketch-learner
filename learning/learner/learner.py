@@ -13,7 +13,7 @@ from .src.instance_data.instance_data import InstanceData
 from .src.instance_data.instance_data_utils import compute_instance_datas
 from .src.instance_data.tuple_graph_utils import compute_tuple_graphs
 from .src.iteration_data.dlplan_policy_factory import D2sepDlplanPolicyFactory, ExplicitDlplanPolicyFactory
-from .src.iteration_data.feature_pool_utils import compute_feature_pool
+from .src.iteration_data.feature_pool_utils import compute_dlplan_feature_pool
 from .src.iteration_data.feature_valuations_utils import compute_per_state_feature_valuations
 from .src.iteration_data.learning_statistics import LearningStatistics
 from .src.iteration_data.sketch import Sketch
@@ -88,7 +88,12 @@ def learn_sketch_for_problem_class(
     with change_dir("iterations"):
         i = 0
         with change_dir(str(i), enable=enable_dump_files):
-            selected_instance_idxs = [0]
+            ## DZC 11/06/2024: do not iterate for expressivity test does not use iteration 
+            ## TODO: uses just first 3 problems for now; should be changed to use as many problems up to some state bound as discussed
+            if encoding_type == EncodingType.EXPRESSIVITY:
+                selected_instance_idxs = [0, 1, 2]
+            else:
+                selected_instance_idxs = [0]
             create_experiment_workspace(workspace)
             while True:
                 logging.info(colored(f"Iteration: {i}", "red", "on_grey"))
@@ -105,7 +110,7 @@ def learn_sketch_for_problem_class(
                           "num_state_equivalences:", len(instance_data.state_space.get_states()))
 
                 logging.info(colored("Initializing DomainFeatureData...", "blue", "on_grey"))
-                domain_data.feature_pool = compute_feature_pool(
+                domain_data.feature_pool = compute_dlplan_feature_pool(
                     domain_data,
                     selected_instance_datas,
                     disable_feature_generation,
@@ -185,7 +190,6 @@ def learn_sketch_for_problem_class(
                         j += 1
                 elif encoding_type == EncodingType.EXPRESSIVITY:
                     ## same as above but d2 facts removed
-                    d2_facts = set()
                     symbols = None
                     asp_factory = ASPFactory(encoding_type, enable_goal_separating_features, max_num_rules)
                     facts = asp_factory.make_facts(domain_data, selected_instance_datas)
@@ -243,7 +247,12 @@ def learn_sketch_for_problem_class(
                 verification_timer.resume()
                 logging.info(colored("Verifying learned sketch...", "blue", "on_grey"))
                 assert compute_smallest_unsolved_instance(sketch, selected_instance_datas, enable_goal_separating_features) is None
-                smallest_unsolved_instance = compute_smallest_unsolved_instance(sketch, instance_datas, enable_goal_separating_features)
+
+                ## DZC 11/06/2024: do not iterate for expressivity test does not use iteration
+                if encoding_type == EncodingType.EXPRESSIVITY:
+                    smallest_unsolved_instance = None
+                else:
+                    smallest_unsolved_instance = compute_smallest_unsolved_instance(sketch, instance_datas, enable_goal_separating_features)
                 logging.info(colored("..done", "blue", "on_grey"))
                 verification_timer.stop()
 
