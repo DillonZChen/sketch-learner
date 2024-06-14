@@ -26,7 +26,7 @@ def compute_dlplan_feature_pool(
     feature_limit: int,
     additional_booleans: List[str],
     additional_numericals: List[str],
-):
+) -> FeaturePool:
     dlplan_states = set()
     for instance_data in instance_datas:
         dlplan_states.update(set(instance_data.state_space.get_states().values()))
@@ -149,4 +149,4 @@ def compute_dlplan_feature_pool(
 
     print()
 
-    return FeaturePool(features)
+    return features

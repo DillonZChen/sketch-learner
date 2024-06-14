@@ -1,11 +1,9 @@
 import re
-
 from abc import ABC, abstractmethod
-
-from dlplan.core import Boolean, Numerical
+from typing import List, MutableSet, Union
 
 from clingo import Symbol
-from typing import List, Union, MutableSet
+from dlplan.core import Boolean, Numerical
 
 from ..domain_data.domain_data import DomainData
 
@@ -44,7 +42,7 @@ class ExplicitDlplanPolicyFactory(DlplanPolicyFactory):
         for symbol in symbols:
             if symbol.name == "select":
                 f_idx = symbol.arguments[0].number
-                selected_features.add(domain_data.feature_pool.features[f_idx].dlplan_feature)
+                selected_features.add(domain_data.feature_pool[f_idx].dlplan_feature)
         return selected_features
 
     def _add_rules(self, symbols: List[Symbol], domain_data: DomainData, selected_features: MutableSet[Union[Boolean, Numerical]]):
@@ -59,7 +57,7 @@ class ExplicitDlplanPolicyFactory(DlplanPolicyFactory):
             if symbol.name in {"c_b_pos", "c_b_neg", "c_n_gt", "c_n_eq", "e_b_pos", "e_b_neg", "e_b_bot", "e_n_dec", "e_n_inc", "e_n_bot"}:
                 r_idx = symbol.arguments[0].number
                 f_idx = symbol.arguments[1].number
-                feature = domain_data.feature_pool.features[f_idx].dlplan_feature
+                feature = domain_data.feature_pool[f_idx].dlplan_feature
                 if feature not in selected_features:
                     continue
                 if symbol.name == "c_b_pos":
@@ -98,7 +96,7 @@ class D2sepDlplanPolicyFactory(DlplanPolicyFactory):
         for symbol in symbols:
             if symbol.name == "select":
                 f_idx = symbol.arguments[0].number
-                dlplan_features.add(domain_data.feature_pool.features[f_idx].dlplan_feature)
+                dlplan_features.add(domain_data.feature_pool[f_idx].dlplan_feature)
         rules = set()
         for symbol in symbols:
             if symbol.name == "good":
@@ -107,13 +105,13 @@ class D2sepDlplanPolicyFactory(DlplanPolicyFactory):
                 conditions = set()
                 for condition in rule.get_conditions():
                     f_idx = int(condition.get_named_element().get_key()[1:])
-                    dlplan_feature = domain_data.feature_pool.features[f_idx].dlplan_feature
+                    dlplan_feature = domain_data.feature_pool[f_idx].dlplan_feature
                     if dlplan_feature in dlplan_features:
                         conditions.add(condition)
                 effects = set()
                 for effect in rule.get_effects():
                     f_idx = int(effect.get_named_element().get_key()[1:])
-                    dlplan_feature = domain_data.feature_pool.features[f_idx].dlplan_feature
+                    dlplan_feature = domain_data.feature_pool[f_idx].dlplan_feature
                     if dlplan_feature in dlplan_features:
                         effects.add(effect)
                 rules.add(policy_builder.make_rule(conditions, effects))

@@ -18,13 +18,14 @@ class Feature(ABC):
 
 @dataclass
 class DLPlanFeature(Feature):
-    """ A single feature with custom complexity. """
+    """A single feature with custom complexity."""
+
     _dlplan_feature: Union[Boolean, Numerical]
     _complexity: int
 
     def is_boolean(self):
         return isinstance(self.dlplan_feature, Boolean)
-    
+
     def is_numerical(self):
         return isinstance(self.dlplan_feature, Numerical)
 
@@ -43,8 +44,5 @@ class DLPlanFeature(Feature):
         return hash(str(self.dlplan_feature))
 
 
-@dataclass
-class FeaturePool:
-    """ Stores the generated pool of features. """
-    features: List[Feature]
-
+""" Stores the generated pool of features. """
+FeaturePool = List[Feature]

@@ -127,7 +127,7 @@ class ASPFactory:
     def _make_domain_feature_data_facts(self, domain_data: DomainData):
         facts = []
         # Domain feature facts
-        for f_idx, feature in enumerate(domain_data.feature_pool.features):
+        for f_idx, feature in enumerate(domain_data.feature_pool):
             facts.append(self._create_feature_fact(f_idx))
             facts.append(self._create_complexity_fact(f_idx, feature.complexity))
             if feature.is_boolean():
@@ -155,7 +155,7 @@ class ASPFactory:
         for instance_data in instance_datas:
             for s_idx in instance_data.state_space.get_states().keys():
                 feature_valuation = instance_data.per_state_feature_valuations.s_idx_to_feature_valuations[s_idx]
-                for f_idx, (feature, val) in enumerate(zip(feature_pool.features, feature_valuation.feature_valuations)):
+                for f_idx, (feature, val) in enumerate(zip(feature_pool, feature_valuation.feature_valuations)):
                     facts.append(self._create_value_fact(instance_data.id, s_idx, f_idx, val))
                     facts.append(self._create_b_value_fact(feature, instance_data.id, s_idx, f_idx, val))
         return facts

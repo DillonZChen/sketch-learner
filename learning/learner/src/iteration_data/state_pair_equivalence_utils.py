@@ -17,7 +17,7 @@ def make_conditions(policy_builder: PolicyFactory,
     feature_valuations: FeatureValuations):
     """ Create conditions over all features that are satisfied in source_idx """
     conditions = set()
-    for f_idx, (feature, val) in enumerate(zip(feature_pool.features, feature_valuations.feature_valuations)):
+    for f_idx, (feature, val) in enumerate(zip(feature_pool, feature_valuations.feature_valuations)):
         if feature.is_boolean():
             if val:
                 conditions.add(policy_builder.make_pos_condition(policy_builder.make_boolean(f"f{f_idx}", feature.dlplan_feature)))
@@ -36,7 +36,7 @@ def make_effects(policy_builder: PolicyFactory,
     target_feature_valuations: FeatureValuations):
     """ Create effects over all features that are satisfied in (source_idx,target_idx) """
     effects = set()
-    for f_idx, (feature, source_val, target_val) in enumerate(zip(feature_pool.features, source_feature_valuations.feature_valuations, target_feature_valuations.feature_valuations)):
+    for f_idx, (feature, source_val, target_val) in enumerate(zip(feature_pool, source_feature_valuations.feature_valuations, target_feature_valuations.feature_valuations)):
         if feature.is_boolean():
             if source_val and not target_val:
                 effects.add(policy_builder.make_neg_effect(policy_builder.make_boolean(f"f{f_idx}", feature.dlplan_feature)))
