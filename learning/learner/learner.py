@@ -1,4 +1,5 @@
 import logging
+from argparse import Namespace
 from pathlib import Path
 from typing import List
 
@@ -13,7 +14,7 @@ from .src.instance_data.instance_data import InstanceData
 from .src.instance_data.instance_data_utils import compute_instance_datas
 from .src.instance_data.tuple_graph_utils import compute_tuple_graphs
 from .src.iteration_data.dlplan_policy_factory import D2sepDlplanPolicyFactory, ExplicitDlplanPolicyFactory
-from .src.iteration_data.feature_pool_utils import compute_dlplan_feature_pool
+from .src.iteration_data.feature_pool_utils import compute_dlplan_feature_pool, feature_pool_factory
 from .src.iteration_data.feature_valuations_utils import compute_per_state_feature_valuations
 from .src.iteration_data.learning_statistics import LearningStatistics
 from .src.iteration_data.sketch import Sketch
@@ -39,28 +40,16 @@ def learn_sketch_for_problem_class(
     problems_directory: Path,
     workspace: Path,
     width: int,
+    opts: Namespace,
     disable_closed_Q: bool = False,
     max_num_states_per_instance: int = 2000,
     max_time_per_instance: int = 10,
     encoding_type: EncodingType = EncodingType.D2,
     max_num_rules: int = 4,
     enable_goal_separating_features: bool = True,
-    disable_feature_generation: bool = True,
-    concept_complexity_limit: int = 9,
-    role_complexity_limit: int = 9,
-    boolean_complexity_limit: int = 9,
-    count_numerical_complexity_limit: int = 9,
-    distance_numerical_complexity_limit: int = 9,
-    feature_limit: int = 1000000,
-    additional_booleans: List[str] = None,
-    additional_numericals: List[str] = None,
     enable_dump_files: bool = False,
 ):
     # Setup arguments and workspace
-    if additional_booleans is None:
-        additional_booleans = []
-    if additional_numericals is None:
-        additional_numericals = []
     instance_filepaths = list(problems_directory.iterdir())
     add_console_handler(logging.getLogger(), logging.INFO)
     create_experiment_workspace(workspace)
@@ -110,18 +99,7 @@ def learn_sketch_for_problem_class(
                           "num_state_equivalences:", len(instance_data.state_space.get_states()))
 
                 logging.info(colored("Initializing DomainFeatureData...", "blue", "on_grey"))
-                domain_data.feature_pool = compute_dlplan_feature_pool(
-                    domain_data,
-                    selected_instance_datas,
-                    disable_feature_generation,
-                    concept_complexity_limit,
-                    role_complexity_limit,
-                    boolean_complexity_limit,
-                    count_numerical_complexity_limit,
-                    distance_numerical_complexity_limit,
-                    feature_limit,
-                    additional_booleans,
-                    additional_numericals)
+                domain_data.feature_pool = feature_pool_factory(domain_data, selected_instance_datas, opts)
                 logging.info(colored("..done", "blue", "on_grey"))
 
                 logging.info(colored("Constructing PerStateFeatureValuations...", "blue", "on_grey"))

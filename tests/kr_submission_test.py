@@ -22,23 +22,18 @@ TIMEOUT = 60
 
 @pytest.mark.parametrize("domain_name", DOMAINS_TO_TEST)
 def test_kr_width0(domain_name):
-    domain_path = f"learning/benchmarks/{domain_name}/domain.pddl"
-    problems_dir = f"learning/benchmarks/{domain_name}/instances"
     os.makedirs(f"workspaces/tests", exist_ok=True)
     current_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     workspace_path = f"workspaces/tests/{domain_name}" + f"_{current_time}"
+    workspace_path = os.path.abspath(workspace_path)
     cmd = [
         "python3",
-        "learning/main.py",
-        "--domain_filepath",
-        domain_path,
-        "--problems_directory",
-        problems_dir,
-        "--width",
-        "0",
-        f"--workspace",
-        f"{workspace_path}",
-        "--encoding_type",
+        "learn.py",
+        domain_name,
+        "dlplan",
+        f"-w",
+        workspace_path,
+        "-e",
         "d2",
     ]
     LOGGER.info(f"Running command:\n{' '.join(cmd)}")

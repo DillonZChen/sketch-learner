@@ -1,3 +1,4 @@
+from argparse import Namespace
 from enum import Enum
 from typing import List
 
@@ -5,7 +6,39 @@ from dlplan.generator import FeatureGenerator
 
 from ..domain_data.domain_data import DomainData
 from ..instance_data.instance_data import InstanceData
-from .feature_pool import DLPlanFeature, FeaturePool
+from .feature import DLPlanFeature
+from .feature_pool import DLPlanFeaturePool, FeaturePool, WLPlanFeaturePool
+
+
+def feature_pool_factory(domain_data: DomainData, instance_datas: List[InstanceData], args: Namespace) -> FeaturePool:
+    if args.feature_pool == "dlplan":
+        pass
+        return compute_dlplan_feature_pool(
+            domain_data,
+            instance_datas,
+            disable_feature_generation=args.disable_feature_generation,
+            concept_complexity_limit=args.concept_complexity_limit,
+            role_complexity_limit=args.role_complexity_limit,
+            boolean_complexity_limit=args.boolean_complexity_limit,
+            count_numerical_complexity_limit=args.count_numerical_complexity_limit,
+            distance_numerical_complexity_limit=args.distance_numerical_complexity_limit,
+            feature_limit=args.feature_limit,
+            additional_booleans=args.additional_booleans,
+            additional_numericals=args.additional_numericals,
+        )
+    elif args.feature_pool == "wlplan":
+        raise NotImplementedError
+    else:
+        raise ValueError(f"Unknown feature pool type: {args.feature_pool}")
+
+
+def compute_wlplan_feature_pool(
+    domain_data: DomainData,
+    instance_datas: List[InstanceData],
+    iterations: int,
+    feature_limit: int,
+) -> WLPlanFeaturePool:
+    raise NotImplementedError
 
 
 class FeatureChange(Enum):
@@ -26,7 +59,7 @@ def compute_dlplan_feature_pool(
     feature_limit: int,
     additional_booleans: List[str],
     additional_numericals: List[str],
-) -> FeaturePool:
+) -> DLPlanFeaturePool:
     dlplan_states = set()
     for instance_data in instance_datas:
         dlplan_states.update(set(instance_data.state_space.get_states().values()))
@@ -149,4 +182,4 @@ def compute_dlplan_feature_pool(
 
     print()
 
-    return features
+    return DLPlanFeaturePool(features)

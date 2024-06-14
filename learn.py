@@ -5,7 +5,9 @@ import subprocess
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Width 0 shortcut")
     parser.add_argument("domain")
-    parser.add_argument("-e", "--encoding", choices=["d2", "explicit", "expressivity"], type=str, default="d2")
+    parser.add_argument("feature_pool", choices=["dlplan", "wlplan"])
+    parser.add_argument("-e", "--encoding", choices=["d2", "explicit", "expressivity"], type=str, default="expressivity")
+    parser.add_argument("-w", "--workspace", default="workspace")
     args = parser.parse_args()
 
     domain_pddl = f"learning/benchmarks/{args.domain}/domain.pddl"
@@ -27,9 +29,11 @@ if __name__ == "__main__":
         "--width",
         "0",
         "--workspace",
-        "workspace",
+        os.path.abspath(args.workspace),
         "--encoding_type",
         args.encoding,
+        "--feature_pool",
+        args.feature_pool,
     ]
 
     subprocess.check_call(cmd, cwd="learning")
