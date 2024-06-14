@@ -1,12 +1,5 @@
-from typing import Dict, Union, List
-from dataclasses import dataclass, field
+from typing import Dict, List, Union
 
+FeatureValuations = List[Union[bool, int]]
 
-@dataclass
-class FeatureValuations:
-    feature_valuations: List[Union[bool, int]] = field(default_factory=list)
-
-
-@dataclass
-class PerStateFeatureValuations:
-    s_idx_to_feature_valuations: Dict[int, FeatureValuations] = field(default_factory=dict)
+PerStateFeatureValuations = Dict[int, FeatureValuations]

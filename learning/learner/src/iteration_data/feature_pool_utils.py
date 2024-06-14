@@ -78,7 +78,7 @@ def compute_dlplan_feature_pool(
         always_nnz = True
         for instance_data in instance_datas:
             for dlplan_state in instance_data.state_space.get_states().values():
-                val = int(feature.dlplan_feature.evaluate(dlplan_state, instance_data.denotations_caches))
+                val = int(feature.evaluate(dlplan_state, instance_data.denotations_caches))
                 if val == 0:
                     always_nnz = False
                     break
@@ -94,10 +94,10 @@ def compute_dlplan_feature_pool(
         for instance_data in instance_datas:
             for s_idx, s_prime_idxs in instance_data.state_space.get_forward_successor_state_indices().items():
                 dlplan_source = instance_data.state_space.get_states()[s_idx]
-                source_val = int(feature.dlplan_feature.evaluate(dlplan_source, instance_data.denotations_caches))
+                source_val = int(feature.evaluate(dlplan_source, instance_data.denotations_caches))
                 for s_prime_idx in s_prime_idxs:
                     dlplan_target = instance_data.state_space.get_states()[s_prime_idx]
-                    target_val = int(feature.dlplan_feature.evaluate(dlplan_target, instance_data.denotations_caches))
+                    target_val = int(feature.evaluate(dlplan_target, instance_data.denotations_caches))
                     if source_val in {0, 2147483647} or target_val in {0, 2147483647}:
                         # Allow arbitrary changes on border values
                         continue
@@ -126,11 +126,11 @@ def compute_dlplan_feature_pool(
                 if instance_data.is_deadend(s_idx):
                     continue
                 dlplan_source = instance_data.state_space.get_states()[s_idx]
-                source_val = int(feature.dlplan_feature.evaluate(dlplan_source, instance_data.denotations_caches))
+                source_val = int(feature.evaluate(dlplan_source, instance_data.denotations_caches))
                 for _, s_prime_idxs in enumerate(tuple_graph.get_state_indices_by_distance()):
                     for s_prime_idx in set(instance_data.state_index_to_representative_state_index[s] for s in s_prime_idxs):
                         dlplan_target = instance_data.state_space.get_states()[s_prime_idx]
-                        target_val = int(feature.dlplan_feature.evaluate(dlplan_target, instance_data.denotations_caches))
+                        target_val = int(feature.evaluate(dlplan_target, instance_data.denotations_caches))
                         if source_val < target_val:
                             changes.append(FeatureChange.UP)
                         elif source_val > target_val:

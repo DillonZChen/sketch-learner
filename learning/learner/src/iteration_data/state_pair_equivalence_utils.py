@@ -17,7 +17,7 @@ def make_conditions(policy_builder: PolicyFactory,
     feature_valuations: FeatureValuations):
     """ Create conditions over all features that are satisfied in source_idx """
     conditions = set()
-    for f_idx, (feature, val) in enumerate(zip(feature_pool, feature_valuations.feature_valuations)):
+    for f_idx, (feature, val) in enumerate(zip(feature_pool, feature_valuations)):
         if feature.is_boolean():
             if val:
                 conditions.add(policy_builder.make_pos_condition(policy_builder.make_boolean(f"f{f_idx}", feature.dlplan_feature)))
@@ -36,7 +36,7 @@ def make_effects(policy_builder: PolicyFactory,
     target_feature_valuations: FeatureValuations):
     """ Create effects over all features that are satisfied in (source_idx,target_idx) """
     effects = set()
-    for f_idx, (feature, source_val, target_val) in enumerate(zip(feature_pool, source_feature_valuations.feature_valuations, target_feature_valuations.feature_valuations)):
+    for f_idx, (feature, source_val, target_val) in enumerate(zip(feature_pool, source_feature_valuations, target_feature_valuations)):
         if feature.is_boolean():
             if source_val and not target_val:
                 effects.add(policy_builder.make_neg_effect(policy_builder.make_boolean(f"f{f_idx}", feature.dlplan_feature)))
@@ -69,11 +69,11 @@ def compute_state_pair_equivalences(domain_data: DomainData,
             r_idx_to_subgoal_states = defaultdict(set)
             subgoal_states_to_r_idx = dict()
             # add conditions
-            conditions = make_conditions(policy_builder, domain_data.feature_pool, instance_data.per_state_feature_valuations.s_idx_to_feature_valuations[s_idx])
+            conditions = make_conditions(policy_builder, domain_data.feature_pool, instance_data.per_state_feature_valuations[s_idx])
             for s_distance, s_prime_idxs in enumerate(tuple_graph.get_state_indices_by_distance()):
                 for s_prime_idx in set(instance_data.state_index_to_representative_state_index[s] for s in s_prime_idxs):
                     # add effects
-                    effects = make_effects(policy_builder, domain_data.feature_pool, instance_data.per_state_feature_valuations.s_idx_to_feature_valuations[s_idx], instance_data.per_state_feature_valuations.s_idx_to_feature_valuations[s_prime_idx])
+                    effects = make_effects(policy_builder, domain_data.feature_pool, instance_data.per_state_feature_valuations[s_idx], instance_data.per_state_feature_valuations[s_prime_idx])
                     # add rule
                     rule = policy_builder.make_rule(conditions, effects)
                     rule_repr = repr(rule)

@@ -154,8 +154,8 @@ class ASPFactory:
         feature_pool = domain_data.feature_pool
         for instance_data in instance_datas:
             for s_idx in instance_data.state_space.get_states().keys():
-                feature_valuation = instance_data.per_state_feature_valuations.s_idx_to_feature_valuations[s_idx]
-                for f_idx, (feature, val) in enumerate(zip(feature_pool, feature_valuation.feature_valuations)):
+                feature_valuation = instance_data.per_state_feature_valuations[s_idx]
+                for f_idx, (feature, val) in enumerate(zip(feature_pool, feature_valuation)):
                     facts.append(self._create_value_fact(instance_data.id, s_idx, f_idx, val))
                     facts.append(self._create_b_value_fact(feature, instance_data.id, s_idx, f_idx, val))
         return facts

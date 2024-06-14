@@ -2,10 +2,12 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Union
 
-from dlplan.core import Boolean, Numerical
+from dlplan.core import Boolean, DenotationsCaches, Numerical
+from dlplan.core import State as DLPlanState
 
 
 class Feature(ABC):
+    _complexity: int
 
     @abstractmethod
     def is_boolean(self):
@@ -14,6 +16,26 @@ class Feature(ABC):
     @abstractmethod
     def is_numerical(self):
         pass
+
+    @abstractmethod
+    def evaluate(self, state: DLPlanState, cache=None):
+        """
+        Evaluates the given state using the feature pool.
+
+        Args:
+            state (DLPlanState): The state to be evaluated.
+            cache (optional): A cache object to store intermediate results. Usually features
+            are not evaluated independently so it is faster to batch evaluate them all at once
+            and cache them such as in DLPlan or WLPlan.
+
+        Returns:
+            None
+        """
+        pass
+
+    @property
+    def complexity(self):
+        return self._complexity
 
 
 @dataclass
@@ -29,19 +51,30 @@ class DLPlanFeature(Feature):
     def is_numerical(self):
         return isinstance(self.dlplan_feature, Numerical)
 
+    def evaluate(self, state: DLPlanState, cache: DenotationsCaches):
+        assert cache is not None
+        assert isinstance(cache, DenotationsCaches)
+        assert isinstance(state, DLPlanState)
+        return self.dlplan_feature.evaluate(state, cache)
+
     @property
     def dlplan_feature(self):
         return self._dlplan_feature
-
-    @property
-    def complexity(self):
-        return self._complexity
 
     def __eq__(self, other: "DLPlanFeature"):
         return self.dlplan_feature == other.dlplan_feature
 
     def __hash__(self):
         return hash(str(self.dlplan_feature))
+
+
+@dataclass
+class WLPlanFeature(Feature):
+    _index: int
+    _complexity: int
+
+    def evaluate(self, state: DLPlanState, cache: List[int]):
+        return cache[self._index]
 
 
 """ Stores the generated pool of features. """

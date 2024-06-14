@@ -1,16 +1,15 @@
 from dataclasses import dataclass
-from typing import List, Dict
 from pathlib import Path
+from typing import Dict, List
 
 from dlplan.core import DenotationsCaches
 from dlplan.state_space import StateSpace
-
-from .tuple_graph import PerStateTupleGraphs
 
 from ..domain_data.domain_data import DomainData
 from ..iteration_data.feature_valuations import PerStateFeatureValuations
 from ..iteration_data.state_pair_equivalence import PerStateStatePairEquivalences
 from ..iteration_data.tuple_graph_equivalence import PerStateTupleGraphEquivalences
+from .tuple_graph import PerStateTupleGraphs
 
 
 @dataclass
