@@ -192,10 +192,9 @@ def learn_sketch_for_problem_class(
                         exit(ExitCode.INTERRUPTED)
 
                     asp_factory.print_statistics()
-                    dlplan_policy = D2sepDlplanPolicyFactory().make_dlplan_policy_from_answer_set(symbols, domain_data)
-                    sketch = Sketch(dlplan_policy, width)
-                    logging.info("Learned the following sketch:")
-                    sketch.print()
+
+                    ## DZC 11/06/2024: terminate, we only care about solving the ASP
+                    exit(0)
                 elif encoding_type == EncodingType.EXPLICIT:
                     asp_factory = ASPFactory(encoding_type, enable_goal_separating_features, max_num_rules)
                     facts = asp_factory.make_facts(domain_data, selected_instance_datas)
@@ -226,11 +225,7 @@ def learn_sketch_for_problem_class(
                 logging.info(colored("Verifying learned sketch...", "blue", "on_grey"))
                 assert compute_smallest_unsolved_instance(sketch, selected_instance_datas, enable_goal_separating_features) is None
 
-                ## DZC 11/06/2024: do not iterate for expressivity test does not use iteration
-                if encoding_type == EncodingType.EXPRESSIVITY:
-                    smallest_unsolved_instance = None
-                else:
-                    smallest_unsolved_instance = compute_smallest_unsolved_instance(sketch, instance_datas, enable_goal_separating_features)
+                smallest_unsolved_instance = compute_smallest_unsolved_instance(sketch, instance_datas, enable_goal_separating_features)
                 logging.info(colored("..done", "blue", "on_grey"))
                 verification_timer.stop()
 
